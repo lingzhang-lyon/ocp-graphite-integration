@@ -1,32 +1,37 @@
 var graphite_url = "http://localhost:8080";  // enter your graphite url, e.g. http://your.graphite.com
 
+var check_metrics_for_app = gon.check_metrics_for_app
+console.log(check_metrics_for_app)
+
+// each check will have a graph
+var metrics =[]
+for(i=0; i<check_metrics_for_app['checks'].length; i++){
+  var graphite_metric="intuit."+check_metrics_for_app['app_name']+".check-"+check_metrics_for_app['checks']
+  metrics.push({
+        "alias": graphite_metric,  // display name for this metric
+        "renderer": 'multi',
+        "targets": [
+            {'target': graphite_metric+'.response',
+             'color': '#A99', 
+             'renderer': 'bar',
+             'alias': 'response time'},
+            {'target': graphite_metric+'.status',
+             'color': '#F00',
+             'alias': 'app status',
+             'renderer': 'line'}
+        ],
+        "description": "metrics for "+graphite_metric, 
+  })
+}
+// console.log(metrics)
+
 var dashboards = 
 [
-  { "name": "OCP APP Status From Graphite",  // give your dashboard a name (required!)
+  { "name": "OCP APP Status Dashboard From Graphite",  // give your dashboard a name (required!)
     "refresh": 5000,  // each dashboard has its own refresh interval (in ms)
     // add an (optional) dashboard description. description can be written in markdown / html.
-    "description": "OCP APP Status From Graphite"
-                ,
-    "metrics":  // metrics is an array of charts on the dashboard
-    [
-      {
-        "alias": "FPS response",  // display name for this metric
-        "target": "intuit.FPS.check-c001.response)",  // enter your graphite barebone target expression here
-        "description": "FPS response time",  // enter your metric description here
-        // "summary": "sum",  // available options: [sum|min|max|avg|last|<function>]
-        "summary_formatter": d3.format(",f") // customize your summary format function. see d3 formatting docs for more options
-        // also supported are tick_formatter to customize y axis ticks, and totals_formatter to format the values in the legend
-      },
-      {
-        "alias": "FPS status",  // display name for this metric
-        "target": "intuit.FPS.check-c001.status)",  // enter your graphite barebone target expression here
-        "description": "FPS status",  // enter your metric description here
-        // "summary": "sum",  // available options: [sum|min|max|avg|last|<function>]
-        "summary_formatter": d3.format(",f") // customize your summary format function. see d3 formatting docs for more options
-        // also supported are tick_formatter to customize y axis ticks, and totals_formatter to format the values in the legend
-      },
-      
-    ]
+    "description": "Status Dashboard For "+ check_metrics_for_app['app_name'],
+    "metrics":  metrics // metrics is an array of charts on the dashboard
   },
   
 ];
